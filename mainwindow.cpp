@@ -100,3 +100,33 @@ void MainWindow::on_bt_refresh_btn_clicked() {
     //ui->bluetooth_list->repaint();
 }
 
+
+void MainWindow::on_wifi_refresh_btn_clicked() {
+    ui->wifi_list->clear();
+    QList<QString> scannedDevices = lWte.getAllWifiDevices();
+    for (int i = 0; i < scannedDevices.size(); i++) {
+        ui->wifi_list->addItem(scannedDevices.at(i));
+    }
+}
+
+
+void MainWindow::on_bt_connect_btn_clicked() {
+    QString deviceAddr = ui->bluetooth_list->currentItem()->text();
+    QStringList deviceAddrArr = deviceAddr.split(" ");
+    deviceAddr = deviceAddrArr.at(deviceAddrArr.size() - 1);
+    qDebug() << deviceAddr;
+    bteMan.connectToDeviceTemp(deviceAddr);
+}
+
+
+void MainWindow::on_wifi_connect_btn_clicked() {
+    QString deviceAddr = ui->wifi_list->currentItem()->text();
+    QString passOption = "";
+    QString password = ui->wifi_password->text();
+    if (password == "") {
+        qDebug() << "[NOTICE]: No Password.";
+        passOption = "None";
+    }
+    lWte.connectToWifiDevice(deviceAddr, password, passOption);
+}
+

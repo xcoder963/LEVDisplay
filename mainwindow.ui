@@ -30,7 +30,7 @@
      <string notr="true">background-color: rgb(193, 231, 191);</string>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="main">
      <widget class="QFrame" name="notification_frame">
@@ -65,6 +65,19 @@ border-radius: 14px;</string>
         <string notr="true">border-radius: 0px;
 background-color: rgb(250, 250, 250);
 font: 14pt &quot;Noto Sans&quot;;</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>100</y>
+         <width>94</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>CheckBox</string>
        </property>
       </widget>
      </widget>
@@ -1000,6 +1013,7 @@ background-color: rgb(230, 230, 230);</string>
        </property>
        <property name="styleSheet">
         <string notr="true">border-radius: 0px;
+color: rgb(0, 0, 0);
 font: 14pt &quot;Noto Sans&quot;;
 background-color: rgb(250, 250, 250);</string>
        </property>
@@ -1073,6 +1087,7 @@ color: rgb(255, 255, 255);</string>
        </property>
        <property name="styleSheet">
         <string notr="true">border-radius: 5px;
+color: rgb(0, 0, 0);
 background-color:  rgb(255, 255, 255);</string>
        </property>
       </widget>

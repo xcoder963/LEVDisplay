@@ -1,4 +1,19 @@
 #include "BluetoothManager.h"
+#include <iostream>
+#include <cstdlib>
+
+BluetoothManager::BluetoothManager() {
+
+}
+
+void BluetoothManager::connectToADevice(QBluetoothLocalDevice &lDevice, const QBluetoothAddress &address) {
+    lDevice.requestPairing(address, QBluetoothLocalDevice::Paired);
+}
+
+void BluetoothManager::connectToDeviceTemp(QString &address) {
+    std::string passString = "bluetoothctl connect " + address.toStdString();
+    system(passString.c_str());
+}
 
 LocalBluetoothDevice::LocalBluetoothDevice() {
     //Check if BT is in your system

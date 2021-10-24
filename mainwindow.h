@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QGraphicsDropShadowEffect>
 #include "BluetoothManager.h"
+#include "wifimanager.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -29,9 +30,14 @@ private slots:
     void on_mode_Btn_clicked();
     void on_mShutDownBtn_clicked();
     void on_bt_refresh_btn_clicked();
+    void on_wifi_refresh_btn_clicked();
+    void on_bt_connect_btn_clicked();
+    void on_wifi_connect_btn_clicked();
 
 private:
     Ui::MainWindow *ui;
     LocalBluetoothDevice lBte;
+    BluetoothManager bteMan;
+    WifiManager lWte;
 };
 #endif // MAINWINDOW_H
