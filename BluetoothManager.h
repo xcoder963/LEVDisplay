@@ -5,9 +5,13 @@
 #include <QBluetoothDeviceDiscoveryAgent>
 #include <QDebug>
 
-class BluetoothManager {
-
-
+class BluetoothManager: public  QObject {
+public:
+    BluetoothManager();
+    void connectToADevice(QBluetoothLocalDevice &lDevice, const QBluetoothAddress &address);
+    void connectToDeviceTemp(QString &address);
+private:
+    QBluetoothAddress *connectedDevice;
 };
 
 class LocalBluetoothDevice: public QObject {
