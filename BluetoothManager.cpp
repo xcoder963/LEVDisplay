@@ -15,6 +15,10 @@ void BluetoothManager::connectToDeviceTemp(QString &address) {
     system(passString.c_str());
 }
 
+BluetoothManager::~BluetoothManager() {
+
+}
+
 LocalBluetoothDevice::LocalBluetoothDevice() {
     //Check if BT is in your system
     if (localDevice.isValid()) {
@@ -58,6 +62,125 @@ QList<QString> LocalBluetoothDevice::getAllScannedDevices() {
     return envDevices;
 }
 
-LocalBluetoothDevice::~LocalBluetoothDevice() {
+BluetoothServer::BluetoothServer() {
 
+}
+
+// Uuid string boi
+static const QLatin1String serviceUuid("04c6093b-0000-1000-8000-00805f9b34fb");
+
+void BluetoothServer::startBTServer(const QBluetoothAddress &localAdapter) {
+    if (rfcommServer) {
+        return;
+    }
+
+    // Create the server
+    rfcommServer = new QBluetoothServer(QBluetoothServiceInfo::RfcommProtocol, this);
+    connect(rfcommServer, &QBluetoothServer::newConnection,
+            this, QOverload<>::of(&BluetoothServer::clientConnected));
+    bool result = rfcommServer->listen(localAdapter);
+    if (!result) {
+        qWarning() << "[WARNING]: Cannot bind server to " + localAdapter.toString() + ".";
+        return;
+    }
+    QBluetoothServiceInfo::Sequence profileSequence;
+    QBluetoothServiceInfo::Sequence classId;
+
+    classId << QVariant::fromValue(QBluetoothUuid(QBluetoothUuid::SerialPort));
+    classId << QVariant::fromValue(qint16(0x100));
+
+    profileSequence.append(QVariant::fromValue(classId));
+    serviceInfo.setAttribute(QBluetoothServiceInfo::BluetoothProfileDescriptorList,
+                             profileSequence);
+
+    classId.clear();
+    classId << QVariant::fromValue(QBluetoothUuid(serviceUuid));
+    classId << QVariant::fromValue(QBluetoothUuid(QBluetoothUuid::SerialPort));
+
+    serviceInfo.setAttribute(QBluetoothServiceInfo::ServiceClassIds, classId);
+
+    // Service name, description and provider here
+    serviceInfo.setAttribute(QBluetoothServiceInfo::ServiceName, tr("BT_Server"));
+    serviceInfo.setAttribute(QBluetoothServiceInfo::ServiceDescription,
+                             tr("Just My Shit Bluetooth Server"));
+    serviceInfo.setAttribute(QBluetoothServiceInfo::ServiceProvider, tr("www.fuckof.com"));
+
+    // Service Uuid
+    serviceInfo.setServiceUuid(QBluetoothUuid(serviceUuid));
+
+    // Service discoverabilty
+    QBluetoothServiceInfo::Sequence publicBrowse;
+    publicBrowse << QVariant::fromValue(QBluetoothUuid(QBluetoothUuid::PublicBrowseGroup));
+    serviceInfo.setAttribute(QBluetoothServiceInfo::BrowseGroupList, publicBrowse);
+
+    // Protocol descriptor
+    QBluetoothServiceInfo::Sequence protocolDescriptorList;
+    QBluetoothServiceInfo::Sequence protocol;
+    protocol << QVariant::fromValue(QBluetoothUuid(QBluetoothUuid::L2cap));
+    protocolDescriptorList.append(QVariant::fromValue(protocol));
+    protocol.clear();
+    protocol << QVariant::fromValue(QBluetoothUuid(QBluetoothUuid::Rfcomm))
+             << QVariant::fromValue(quint8(rfcommServer->serverPort()));
+    protocolDescriptorList.append(QVariant::fromValue(protocol));
+    serviceInfo.setAttribute(QBluetoothServiceInfo::ProtocolDescriptorList,
+                             protocolDescriptorList);
+
+    // Register Service
+    serviceInfo.registerService(localAdapter);
+}
+
+void BluetoothServer::stopBTServer() {
+    // Unregister service
+    serviceInfo.unregisterService();
+    // Close sockets
+    qDeleteAll(clientSockets);
+    // Close server
+    delete rfcommServer;
+    rfcommServer = nullptr;
+}
+
+void BluetoothServer::clientConnected() {
+    QBluetoothSocket *socket = rfcommServer->nextPendingConnection();
+    if (!socket) {
+        return;
+    }
+
+    connect(socket, &QBluetoothSocket::readyRead, this, &BluetoothServer::readSocket);
+    connect(socket, &QBluetoothSocket::disconnected, this,
+            QOverload<>::of(&BluetoothServer::clientDisconnected));
+    clientSockets.append(socket);
+    emit clientConnected(socket->peerName());
+}
+
+void BluetoothServer::clientDisconnected() {
+    QBluetoothSocket *socket = qobject_cast<QBluetoothSocket *>(sender());
+    if (!socket) {
+        return;
+    }
+    emit clientDisconnected(socket->peerName());
+    clientSockets.removeOne(socket);
+    socket->deleteLater();
+}
+
+void BluetoothServer::sendData(const QString &data) {
+    QByteArray dataTS = data.toUtf8() + '\n';
+    for (QBluetoothSocket *socket: qAsConst(clientSockets)) {
+        socket->write(dataTS);
+    }
+}
+
+void BluetoothServer::readSocket() {
+    QBluetoothSocket *socket = qobject_cast<QBluetoothSocket *>(sender());
+    if (!socket) {
+        return;
+    }
+
+    while (socket->canReadLine()) {
+        QByteArray line = socket->readLine().trimmed();
+        emit dataRecieved(socket->peerName(), QString::fromUtf8(line.constData(), line.length()));
+    }
+}
+
+BluetoothServer::~BluetoothServer() {
+    stopBTServer();
 }
