@@ -67,19 +67,6 @@ background-color: rgb(250, 250, 250);
 font: 14pt &quot;Noto Sans&quot;;</string>
        </property>
       </widget>
-      <widget class="QCheckBox" name="checkBox">
-       <property name="geometry">
-        <rect>
-         <x>30</x>
-         <y>100</y>
-         <width>94</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>CheckBox</string>
-       </property>
-      </widget>
      </widget>
      <widget class="QLabel" name="estimated_label">
       <property name="geometry">

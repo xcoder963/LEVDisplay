@@ -25,6 +25,8 @@ set(PROJECT_SOURCES
         BluetoothManager.h
         wifimanager.cpp
         wifimanager.h
+        screenmanager.cpp
+        screenmanager.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
