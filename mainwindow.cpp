@@ -41,6 +41,31 @@ MainWindow::MainWindow(QWidget *parent)
     ui->battery_another->setStyleSheet(someExtraShit[1]);
 
     //ui->map_frame->setUrl(QUrl("/home/xcoder963/Projects/perm/LEV/build-LEVScreen-Desktop-Debug/mapResources/index.html"));
+
+    btServer = new BluetoothServer(this);
+
+    connect(btServer, QOverload<const QString &>::of(&BluetoothServer::clientConnected),
+            this, &MainWindow::clientConnected);
+    connect(btServer, QOverload<const QString &>::of(&BluetoothServer::clientDisconnected),
+            this, &MainWindow::clientDisconnected);
+    connect(btServer, &BluetoothServer::dataRecieved, this,
+            &MainWindow::showRecivedData);
+
+    btServer->startBTServer();
+}
+
+void MainWindow::clientConnected(const QString &devName) {
+    qDebug() << "[NOTICE]: Got a connection from " + devName + ".";
+}
+
+void MainWindow::clientDisconnected(const QString &devName) {
+    qDebug() << "[NOTICE]: Got a disconnection from " + devName + ".";
+}
+
+void MainWindow::showRecivedData(const QString &senderName, const QString &data) {
+    qDebug() << "[NOTICE]: Got data := " + data + " from " + senderName + ".";
+    ui->notification_list->addItem(data);
+    ui->notification_list->repaint();
 }
 
 template <class T>

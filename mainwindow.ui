@@ -63,6 +63,7 @@ border-radius: 14px;</string>
        </property>
        <property name="styleSheet">
         <string notr="true">border-radius: 0px;
+color: rgb(0, 0, 0);
 background-color: rgb(250, 250, 250);
 font: 14pt &quot;Noto Sans&quot;;</string>
        </property>
