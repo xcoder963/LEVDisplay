@@ -14,13 +14,21 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
 
     template<class T>
     void applyShadow(T Arr, qint16 radius);
     void applyIcons();
 
     ~MainWindow();
+
+public slots:
+    void clientConnected(const QString &devName);
+    void clientDisconnected(const QString &devName);
+    //void clientDisconnected();
+    //void connected(const QString &devName);
+    void showRecivedData(const QString &senderName, const QString &data);
+    //void reactOnSocketError(const QString &error);
 
 private slots:
     void on_bluetooth_button_clicked();
@@ -39,5 +47,6 @@ private:
     LocalBluetoothDevice lBte;
     BluetoothManager bteMan;
     WifiManager lWte;
+    BluetoothServer *btServer;
 };
 #endif // MAINWINDOW_H

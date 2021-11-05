@@ -62,7 +62,8 @@ QList<QString> LocalBluetoothDevice::getAllScannedDevices() {
     return envDevices;
 }
 
-BluetoothServer::BluetoothServer() {
+BluetoothServer::BluetoothServer(QObject *parent)
+    : QObject(parent) {
 
 }
 
@@ -82,6 +83,8 @@ void BluetoothServer::startBTServer(const QBluetoothAddress &localAdapter) {
     if (!result) {
         qWarning() << "[WARNING]: Cannot bind server to " + localAdapter.toString() + ".";
         return;
+    } else {
+        qDebug() << "[INFO]: Server started.";
     }
     QBluetoothServiceInfo::Sequence profileSequence;
     QBluetoothServiceInfo::Sequence classId;
@@ -153,6 +156,7 @@ void BluetoothServer::clientConnected() {
 }
 
 void BluetoothServer::clientDisconnected() {
+    qDebug() << "Got here again.";
     QBluetoothSocket *socket = qobject_cast<QBluetoothSocket *>(sender());
     if (!socket) {
         return;
@@ -170,14 +174,35 @@ void BluetoothServer::sendData(const QString &data) {
 }
 
 void BluetoothServer::readSocket() {
+    //qDebug() << "Got here.";
     QBluetoothSocket *socket = qobject_cast<QBluetoothSocket *>(sender());
     if (!socket) {
         return;
     }
 
-    while (socket->canReadLine()) {
+    //qDebug() << socket->readLine();
+
+    /*while (socket->canReadLine()) {
         QByteArray line = socket->readLine().trimmed();
+        qDebug() << line;
         emit dataRecieved(socket->peerName(), QString::fromUtf8(line.constData(), line.length()));
+    }*/
+
+    QByteArray data =  socket->readLine();
+    qDebug() << data;
+    std::string fData = data.toStdString();
+    QString processedData = QString::fromStdString(fData);
+    QString protocol = processedData.mid(2, 5);
+
+    if (protocol == "[BRK]") {
+        // Signal shit boi
+        emit clientDisconnected();
+        //emit dataRecieved(socket->peerName(), processedData.mid(9, processedData.length()));
+    } else if (protocol == "[ICP]") {
+        emit dataRecieved(socket->peerName(), processedData.mid(9, processedData.length()));
+    } else if (protocol == "[ISP]") {
+        // will update for SMS here
+        emit dataRecieved(socket->peerName(), processedData.mid(9, processedData.length()));
     }
 }
 

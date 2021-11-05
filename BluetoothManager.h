@@ -21,7 +21,7 @@ class BluetoothServer: public QObject {
     Q_OBJECT
 
 public:
-    BluetoothServer();
+    explicit BluetoothServer(QObject *parent = nullptr);
     ~BluetoothServer();
     void startBTServer(const QBluetoothAddress &localAdapter = QBluetoothAddress());
     void stopBTServer();
