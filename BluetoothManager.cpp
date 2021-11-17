@@ -84,7 +84,7 @@ void BluetoothServer::startBTServer(const QBluetoothAddress &localAdapter) {
         qWarning() << "[WARNING]: Cannot bind server to " + localAdapter.toString() + ".";
         return;
     } else {
-        qDebug() << "[INFO]: Server started.";
+        qDebug() << "[NOTICE]: Bluetooth server started.";
     }
     QBluetoothServiceInfo::Sequence profileSequence;
     QBluetoothServiceInfo::Sequence classId;
@@ -133,6 +133,7 @@ void BluetoothServer::startBTServer(const QBluetoothAddress &localAdapter) {
 }
 
 void BluetoothServer::stopBTServer() {
+    qDebug() << "[NOTICE]: Bluetooth server stoped.";
     // Unregister service
     serviceInfo.unregisterService();
     // Close sockets
@@ -156,7 +157,7 @@ void BluetoothServer::clientConnected() {
 }
 
 void BluetoothServer::clientDisconnected() {
-    qDebug() << "Got here again.";
+    //qDebug() << "Got here again.";
     QBluetoothSocket *socket = qobject_cast<QBluetoothSocket *>(sender());
     if (!socket) {
         return;
@@ -189,20 +190,30 @@ void BluetoothServer::readSocket() {
     }*/
 
     QByteArray data =  socket->readLine();
-    qDebug() << data;
+    //qDebug() << data;
     std::string fData = data.toStdString();
     QString processedData = QString::fromStdString(fData);
     QString protocol = processedData.mid(2, 5);
+
+    /*
+        Protocols:-
+        [BRK] := Break Connection Protocol.
+        [ICP] := Incomming Call Protocol.
+        [ISP] := Incomming Sms Protocol.
+        [IGP] := Incomming Geo Location Protocol.
+    */
 
     if (protocol == "[BRK]") {
         // Signal shit boi
         emit clientDisconnected();
         //emit dataRecieved(socket->peerName(), processedData.mid(9, processedData.length()));
     } else if (protocol == "[ICP]") {
-        emit dataRecieved(socket->peerName(), processedData.mid(9, processedData.length()));
+        emit dataRecieved(protocol, socket->peerName(), processedData.mid(9, processedData.length()));
     } else if (protocol == "[ISP]") {
         // will update for SMS here
-        emit dataRecieved(socket->peerName(), processedData.mid(9, processedData.length()));
+        emit dataRecieved(protocol, socket->peerName(), processedData.mid(9, processedData.length()));
+    } else if (protocol == "[IGP]") {
+        emit dataRecieved(protocol, socket->peerName(), processedData.mid(9, processedData.length()));
     }
 }
 

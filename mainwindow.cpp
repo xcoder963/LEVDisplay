@@ -7,6 +7,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->setupUi(this);
 
+    //ui->mainStackPane->setCurrentIndex(1);
+
     //just some background stuff will remove this later
     QString backColor = "background-color: rgb(255, 255, 255);";
     ui->main->setStyleSheet(backColor);
@@ -37,11 +39,24 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->br_in->setStyleSheet(someExtraShit[0]);
     ui->br_de->setStyleSheet(someExtraShit[0]);
+    ui->btServerOn->setStyleSheet(someExtraShit[0]);
+    ui->btServerOf->setStyleSheet(someExtraShit[0]);
     ui->battery_progressBar->setStyleSheet(someExtraShit[1]);
     ui->battery_another->setStyleSheet(someExtraShit[1]);
+    ui->loginUserName->setStyleSheet("border: 1.5px solid black; border-radius: 8px; color: rgb(0, 0, 0);");
+    ui->loginUserPassword->setStyleSheet("border: 1.5px solid black; border-radius: 8px; color: rgb(0, 0, 0);");
+
+    // This is temprory
+    ui->btServerOn->setDisabled(true);
 
     //ui->map_frame->setUrl(QUrl("/home/xcoder963/Projects/perm/LEV/build-LEVScreen-Desktop-Debug/mapResources/index.html"));
 
+    //std::thread serverThread(&MainWindow::startServer, this);
+    //std::future<void> fut = std::async(&MainWindow::startServer, this);
+    MainWindow::startServer();
+}
+
+void MainWindow::startServer() {
     btServer = new BluetoothServer(this);
 
     connect(btServer, QOverload<const QString &>::of(&BluetoothServer::clientConnected),
@@ -62,14 +77,18 @@ void MainWindow::clientDisconnected(const QString &devName) {
     qDebug() << "[NOTICE]: Got a disconnection from " + devName + ".";
 }
 
-void MainWindow::showRecivedData(const QString &senderName, const QString &data) {
+void MainWindow::showRecivedData(const QString &type, const QString &senderName, const QString &data) {
     qDebug() << "[NOTICE]: Got data := " + data + " from " + senderName + ".";
-    ui->notification_list->addItem(data);
-    ui->notification_list->repaint();
+    if (type == "[ICP]" || type == "[ISP]") {
+        ui->notification_list->addItem(data);
+        ui->notification_list->repaint();
+    } else if (type == "[IGP]"){
+        ui->stackedWidget->setCurrentIndex(4);
+    }
 }
 
 template <class T>
-void MainWindow::applyShadow(T Arr, qint16 radius) {
+void MainWindow::applyShadow(T &Arr, qint16 radius) {
     for(auto UI_OBJ:  Arr) {
         //I will memory manage this shit later
         auto *effect = new QGraphicsDropShadowEffect;
@@ -99,6 +118,8 @@ void MainWindow::applyIcons() {
     ui->indicator_img_button_mp->setIconSize(QSize(60, 60));
     ui->motorOn->setIcon(QIcon("images/motor_on.png"));
     ui->motorOn->setIconSize(QSize(30, 30));
+    ui->loginMainIcon->setIcon(QIcon("images/login.png"));
+    ui->loginMainIcon->setIconSize(QSize(150, 100));
 }
 
 MainWindow::~MainWindow() {
@@ -111,6 +132,7 @@ void MainWindow::on_wifi_button_clicked() { ui->stackedWidget->setCurrentIndex(3
 void MainWindow::on_map_mini_clicked() { ui->stackedWidget->setCurrentIndex(4); }
 void MainWindow::on_menuButton_clicked() { ui->stackedWidget->setCurrentIndex(1); }
 void MainWindow::on_mode_Btn_clicked() { ui->stackedWidget->setCurrentIndex(0); }
+void MainWindow::on_loginBtn_clicked() { ui->mainStackPane->setCurrentIndex(1); }
 void MainWindow::on_mShutDownBtn_clicked() { QCoreApplication::quit(); }
 
 
@@ -155,3 +177,68 @@ void MainWindow::on_wifi_connect_btn_clicked() {
     lWte.connectToWifiDevice(deviceAddr, password, passOption);
 }
 
+// Boi is this ugly
+void MainWindow::on_E_button_clicked() {
+    ui->E_button->setGeometry(270, 420, 140, 60);
+    ui->E_button->setText("Economy");
+    ui->P_button->setGeometry(420, 420, 60, 60);
+    ui->P_button->setText("P");
+    ui->S_button->setGeometry(490, 420, 60, 60);
+    ui->S_button->setText("S");
+    ui->R_button->setGeometry(560, 420, 60, 60);
+    ui->R_button->setText("R");
+}
+
+
+void MainWindow::on_P_button_clicked() {
+    ui->E_button->setGeometry(270, 420, 60, 60);
+    ui->E_button->setText("E");
+    ui->P_button->setGeometry(340, 420, 140, 60);
+    ui->P_button->setText("Power");
+    ui->S_button->setGeometry(490, 420, 60, 60);
+    ui->S_button->setText("S");
+    ui->R_button->setGeometry(560, 420, 60, 60);
+    ui->R_button->setText("R");
+}
+
+
+void MainWindow::on_S_button_clicked() {
+    ui->E_button->setGeometry(270, 420, 60, 60);
+    ui->E_button->setText("E");
+    ui->P_button->setGeometry(340, 420, 60, 60);
+    ui->P_button->setText("P");
+    ui->S_button->setGeometry(410, 420, 140, 60);
+    ui->S_button->setText("Sports");
+    ui->R_button->setGeometry(560, 420, 60, 60);
+    ui->R_button->setText("R");
+}
+
+
+void MainWindow::on_R_button_clicked() {
+    ui->E_button->setGeometry(270, 420, 60, 60);
+    ui->E_button->setText("E");
+    ui->P_button->setGeometry(340, 420, 60, 60);
+    ui->P_button->setText("P");
+    ui->S_button->setGeometry(410, 420, 60, 60);
+    ui->S_button->setText("S");
+    ui->R_button->setGeometry(480, 420, 140, 60);
+    ui->R_button->setText("Race");
+}
+
+
+void MainWindow::on_btServerOn_clicked() {
+    ui->btServerOn->setDisabled(true);
+    MainWindow::startServer();
+    ui->btServerOf->setDisabled(false);
+}
+
+
+void MainWindow::on_btServerOf_clicked() {
+    ui->btServerOf->setDisabled(true);
+    delete btServer;
+    ui->btServerOn->setDisabled(false);
+}
+
+
+void MainWindow::on_mDocumentBtn_clicked() {  }
+void MainWindow::on_mErrorsBtn_clicked() { }
