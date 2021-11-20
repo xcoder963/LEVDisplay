@@ -11,10 +11,14 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CURL_LIBRARY "-lcurl")
+
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS WebEngineWidgets)
 find_package(Qt5 COMPONENTS Bluetooth Network)
+find_package(CURL REQUIRED)
+find_package(Qt5 COMPONENTS Widgets VirtualKeyboard REQUIRED)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -27,7 +31,13 @@ set(PROJECT_SOURCES
         wifimanager.h
         screenmanager.cpp
         screenmanager.h
+        threadmanager.cpp
+        threadmanager.h
+        webinteractions.cpp
+        webinteractions.h
 )
+
+include_directories(${CURL_INCLUDE_DIR})
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(LEVScreen
@@ -53,7 +63,7 @@ else()
 endif()
 
 target_link_libraries(LEVScreen PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
-    Qt5::WebEngineWidgets Qt5::Bluetooth Qt5::Network)
+    Qt5::WebEngineWidgets Qt5::Bluetooth Qt5::Network Qt5::VirtualKeyboard ${CURL_LIBRARIES})
 
 set_target_properties(LEVScreen PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

@@ -30,7 +30,7 @@ public slots:
     void sendData(const QString &data);
 
 signals:
-    void dataRecieved(const QString &sender, const QString &data);
+    void dataRecieved(const QString &type, const QString &sender, const QString &data);
     void clientConnected(const QString &name);
     void clientDisconnected(const QString &name);
 

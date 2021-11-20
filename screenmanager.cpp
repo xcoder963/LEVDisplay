@@ -1,6 +1,5 @@
 #include "screenmanager.h"
 
-screenManager::screenManager()
-{
+screenManager::screenManager() {
 
 }
